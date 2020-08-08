@@ -1,8 +1,11 @@
 ﻿// Learn more about F# at http://fsharp.org
 
 open System
+open Suave.Web
+open Suave.Filters
 
 [<EntryPoint>]
 let main argv =
-    printfn "Hello World from F#!"
+    let webpart = pathScan "/api/profile/%s" ApiGateway.getProfile
+    startWebServer defaultConfig webpart
     0 // return an integer exit code
