@@ -8,6 +8,7 @@
     <Compile Include="GitHub.fs" />
     <Compile Include="ObservableExtensions.fs" />
     <Compile Include="Profile.fs" />
+    <Compile Include="ApiGateway.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
