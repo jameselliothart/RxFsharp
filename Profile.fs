@@ -1,27 +1,32 @@
 module Profile
 
+open Http
 open GitHub
+open ObservableExtensions
+open System.Reactive.Threading.Tasks
+open FSharp.Control.Reactive
 
-type Profile = {
-    Name : string
-    AvatarUrl : string
-    PopularRepositories : Repository seq
-} and Repository = {
-    Name : string
-    Stars : int
-    Languages : string[]
-}
 
-let reposResponseToPopularRepos = function
-    | Ok(r) -> r |> parseUserRepos |> popularRepos
-    | _ -> [||]
+let getProfile username =
+    let userStream = username |> userUrl |> asyncResponseToObservable
 
-let languageResponseToRepoWithLanguages (repo : GitHubUserRepos.Root) = function
-    | Ok(l) -> {Name = repo.Name; Languages = (parseLanguages l); Stars = repo.StargazersCount}
-    | _ -> {Name = repo.Name; Languages = Array.empty; Stars = repo.StargazersCount}
+    let toRepoWithLanguagesStream (repo : GitHubUserRepos.Root) =
+        username
+        |> languagesUrl repo.Name
+        |> asyncResponseToObservable
+        |> Observable.map (languageResponseToRepoWithLanguages repo)
 
-let toProfile = function
-    | Ok u, repos ->
-        let user = parseUser u
-        {Name = user.Name; PopularRepositories = repos; AvatarUrl = user.AvatarUrl} |> Some
-    | _ -> None
+    let popularReposStream =
+        username
+        |> reposUrl
+        |> asyncResponseToObservable
+        |> Observable.map reposResponseToPopularRepos
+        |> flatmap2 toRepoWithLanguagesStream
+
+    async {
+        return! popularReposStream
+        |> Observable.zip userStream
+        |> Observable.map toProfile
+        |> TaskObservableExtensions.ToTask
+        |> Async.AwaitTask
+    }
