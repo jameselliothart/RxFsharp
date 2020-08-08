@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
@@ -7,6 +6,7 @@
   <ItemGroup>
     <Compile Include="Http.fs" />
     <Compile Include="GitHub.fs" />
+    <Compile Include="ObservableExtensions.fs" />
     <Compile Include="Profile.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
